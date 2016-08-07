@@ -8,7 +8,7 @@ This is a repository for all my notes about the installation of [KLEE](https://k
 
 ## Introduction
 
-There are a ton of installation instructions for [KLEE](https://klee.github.io/) out there in the web. This is yet another manual, but it tries to be a little different. First of all, it is not Ubuntu specific. It works on Ubuntu, but it also works on other distros like Arch Linux. Furthermore, this setup do not use the sudo command or any kind of installation. You get a pure local build directory full of all the necessary tools and nothing else. Thereby, you can have multiple klee versions and setups on the same machine. In order to uninstall this tools simply remove the generated build dirs.
+There are a ton of installation instructions for [KLEE](https://klee.github.io/) out there in the web. This is yet another manual, but it tries to be a little different. First of all, it is not Ubuntu specific. It works on Ubuntu, but it also works on other distros like Arch Linux. Furthermore, this setup do not use the sudo command or any kind of installation. You get a pure local build directory full of all the necessary tools and nothing else. Thereby, you can have multiple klee versions and setups on the same machine. In order to uninstall these tools, simply remove the directory, where they have been built in.
 
 ### The resulting directory structure:
 ```
@@ -21,9 +21,11 @@ build
 └── z3
 ```
 
+I prefer having my self-compiled binaries in a build-folder inside my home directory, but you are free to place it wherever you want. Just create an empty directory anywhere in your system, remember its path and name, and execute all the following commands inside this directory.
+
 ### storage-usage
 
-The whole files, that are needed during the build process, needs at least 2 GB of storage. This manual uses version control systems (git, svn) to download the source files. Thereby each file is stored twice: in the version control and in the checkout-folder. The version control is not really useful or necessary, so this manual removes these files with commands like `rm -rf {.git,.svn}`. You can leave this commands out, but remember, that this will likely double the amount of storage to at least 4 GB in total.
+The whole files, that are needed during the build process, needs at least 2 GB of storage. This manual uses version control systems (git, svn) to download the source files. Thereby each file is stored twice: in the version control and in the checkout-folder. The version control is not really useful or necessary for non-developers of these tools, so this manual removes these files with commands like `rm -rf {.git,.svn}`. You can leave this commands out, but remember, that this will likely double the amount of storage to at least 4 GB in total.
 
 
 ## Usefull Links:
@@ -155,7 +157,7 @@ cd ../..
 
 ## Step 6: KLEE
 
-This is the only step in the setup, where we need absolute path in the variables. I prefer having my self-compiled binaries in a build-folder inside my home directory, but you are free to place it wherever you want. Simply replace /home/user/build/ with anything, that fits your needs.
+This is the only step in this manual, where we need the absolute path in the variables. If you don't use a build directory in your home folder, simply replace /home/user/build/ with anything, that fits your needs.
 
 ```
 git clone --depth 1 --branch v1.2.0 https://github.com/klee/klee.git
@@ -185,17 +187,23 @@ A small note: I have tried this setup on several systems and this last check has
 
 ## Step 7: Link some executables
 
+This step is completely optional, but if you have to execute the generated programs again and again, it is helpful to have smaller shortcuts for them. For this purpose all modern shells offers some way of creating `alias`-commands.
+
+Put these lines at the end of your `~/.bashrc` (if using bash) or `~/.zshrc` (if using zsh). If you don't use a build-directory in your home folder, just replace the paths corresponding to your directory structure. To separate the self-build versions from the system ones, I add the prefix "my" to the alias commands, but you can name them what ever you want.
+
 ```
-TODO: Link KLEE to ~/bin/
+alias       myklee="~/build/klee/Release+Asserts/bin/klee"
+alias myktest-tool="~/build/klee/Release+Asserts/bin/ktest-tool"
+alias      myclang="~/build/llvm/Release/bin/clang"
+alias        mylli="~/build/llvm/Release/bin/lli"
+alias   myllvm-dis="~/build/llvm/Release/bin/llvm-dis"
 ```
 
-TODO: error while loading shared libraries: libkleeRuntest.so.1.0: cannot open shared object file: No such file or directory
--> `ln -s libkleeRuntest.so libkleeRuntest.so.1.0`
+These are definitely not all the binaries created by this manual, but at least the most common ones. Nevertheless, I assume you see the pattern and of course you can add, whatever you find helpful.
 
+## Solutions for common errors
 
-## Solution for common errors
-
-### During the ./configure command of Klee
+### During the ./configure command of KLEE
 
 ```
 checking for vc_setInterfaceFlags in -lstp... no
@@ -214,10 +222,20 @@ configure:5146: g++ -o conftest -g -O2   conftest.cpp -lstp -L.../stp/build/lib 
 
 In other words, the compiler cannot find a lot of minisat functions. This problem is caused by the shared library for minisat, that must be added and must be found during the compilation process. Make sure, that you are giving the correct path to minisat in the LDFLAGS. See step 6 for details.
 
-### During runs of klee
+### During runs of KLEE
 
 ```
 .../bin/klee: error while loading shared libraries: libz3.so: cannot open shared object file: No such file or directory
 ```
 
-Klee cannot find the libz3.so library of Z3. The easiest solution is to copy the library to the lib directory of Klee. See step 6 for details.
+KLEE cannot find the libz3.so library of Z3. The easiest solution is to directly copy the library to the lib directory of KLEE. See step 6 for details.
+
+----------
+
+```
+error while loading shared libraries: libkleeRuntest.so.1.0: cannot open shared object file: No such file or directory
+```
+Somehow, KLEE searches a specific version of its shared library and its Makefile just generates a generic one. To solve this error, just create a symbolic link to the generic library as the specific version required.
+```
+ln -s ~/build/klee/Release+Asserts/lib/libkleeRuntest.so ~/build/klee/Release+Asserts/lib/libkleeRuntest.so.1.0
+```
