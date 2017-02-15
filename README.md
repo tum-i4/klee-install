@@ -46,7 +46,7 @@ sudo apt-get install bc bison build-essential cmake curl flex git libboost-all-d
 ```
 ### Arch Linux
 ```
-sudo pacman -S bc bison boost cmake curl flex gcc git libcap ncurses python2 python2-pip subversion zlib
+sudo pacman -S bc bison boost cmake curl flex gcc git libcap ncurses python python2 python2-pip subversion zlib
 ```
 
 
@@ -84,7 +84,7 @@ cd ..
 
 ```
 git clone --depth 1 https://github.com/stp/minisat.git
-# Commit ID: 37dc6c67e2af26379d88ce349eb9c4c6160e8543 (more than 2 years old)
+# Commit ID: 3db58943b6ffe855d3b8c9a959300d9a148ab554 (very old - from Jun 22, 2015)
 rm -rf minisat/.git
 
 cd minisat
@@ -96,13 +96,14 @@ cd ..
 ## Step 3: STP
 
 ```
-git clone --depth 1 --branch 2.1.2 https://github.com/stp/stp.git
+git clone --depth 1 --branch stp-2.2.0 https://github.com/stp/stp.git
 rm -rf stp/.git
 
 cd stp
 mkdir build
 cd build
 cmake \
+ -DBUILD_STATIC_BIN=ON \
  -DBUILD_SHARED_LIBS:BOOL=OFF \
  -DENABLE_PYTHON_INTERFACE:BOOL=OFF \
  -DMINISAT_INCLUDE_DIR="../../minisat/" \
@@ -129,7 +130,7 @@ cd ..
 
 ## Step 5: Z3
 ```
-git clone --depth 1 --branch z3-4.4.1 https://github.com/Z3Prover/z3.git
+git clone --depth 1 --branch z3-4.5.0 https://github.com/Z3Prover/z3.git
 rm -rf z3/.git
 
 cd z3
@@ -144,9 +145,12 @@ cp ../src/api/z3.h ./include/z3.h
 cp ../src/api/z3_v1.h ./include/z3_v1.h
 cp ../src/api/z3_macros.h ./include/z3_macros.h
 cp ../src/api/z3_api.h ./include/z3_api.h
+cp ../src/api/z3_ast_containers.h ./include/z3_ast_containers.h
 cp ../src/api/z3_algebraic.h ./include/z3_algebraic.h
 cp ../src/api/z3_polynomial.h ./include/z3_polynomial.h
 cp ../src/api/z3_rcf.h ./include/z3_rcf.h
+cp ../src/api/z3_fixedpoint.h ./include/z3_fixedpoint.h
+cp ../src/api/z3_optimization.h ./include/z3_optimization.h
 cp ../src/api/z3_interp.h ./include/z3_interp.h
 cp ../src/api/z3_fpa.h ./include/z3_fpa.h
 cp libz3.so ./lib/libz3.so
@@ -157,21 +161,22 @@ cd ../..
 
 ## Step 6: KLEE
 
-This is the only step in this manual, where we need the absolute path in the variables. If you don't use a build directory in your home folder, simply replace /home/user/build/ with anything, that fits your needs.
+This is the only step in this manual, where we need the absolute path in the commands. The trick with the custom shell variable should solve it correctly. Nevertheless, if the configure command fails, try it again with explicit paths.
 
 ```
-git clone --depth 1 --branch v1.2.0 https://github.com/klee/klee.git
+git clone --depth 1 --branch v1.3.0 https://github.com/klee/klee.git
 rm -rf klee/.git
 
+BUILDDIR=`pwd`
 cd klee
 ./configure \
- LDFLAGS="-L/home/user/build/minisat/build/release/lib/" \
- --with-llvm=/home/user/build/llvm/ \
- --with-llvmcc=/home/user/build/llvm/Release/bin/clang \
- --with-llvmcxx=/home/user/build/llvm/Release/bin/clang++ \
- --with-stp=/home/user/build/stp/build/ \
- --with-uclibc=/home/user/build/klee-uclibc \
- --with-z3=/home/user/build/z3/build/ \
+ LDFLAGS="-L$BUILDDIR/minisat/build/release/lib/" \
+ --with-llvm=$BUILDDIR/llvm/ \
+ --with-llvmcc=$BUILDDIR/llvm/Release/bin/clang \
+ --with-llvmcxx=$BUILDDIR/llvm/Release/bin/clang++ \
+ --with-stp=$BUILDDIR/stp/build/ \
+ --with-uclibc=$BUILDDIR/klee-uclibc \
+ --with-z3=$BUILDDIR/z3/build/ \
  --enable-posix-runtime
 
 make -j `nproc` ENABLE_OPTIMIZED=1

@@ -84,7 +84,7 @@ cd ..
 ########################################
 
 git clone --depth 1 https://github.com/stp/minisat.git
-# Commit ID: 37dc6c67e2af26379d88ce349eb9c4c6160e8543 (more than 2 years old)
+# Commit ID: 3db58943b6ffe855d3b8c9a959300d9a148ab554 (very old - from Jun 22, 2015)
 rm -rf minisat/.git
 
 cd minisat
@@ -95,13 +95,14 @@ cd ..
 # STEP 3: STP
 ########################################
 
-git clone --depth 1 --branch 2.1.2 https://github.com/stp/stp.git
+git clone --depth 1 --branch stp-2.2.0 https://github.com/stp/stp.git
 rm -rf stp/.git
 
 cd stp
 mkdir build
 cd build
 cmake \
+ -DBUILD_STATIC_BIN=ON \
  -DBUILD_SHARED_LIBS:BOOL=OFF \
  -DENABLE_PYTHON_INTERFACE:BOOL=OFF \
  -DMINISAT_INCLUDE_DIR="../../minisat/" \
@@ -130,7 +131,7 @@ cd ..
 # STEP 5: Z3
 ########################################
 
-git clone --depth 1 --branch z3-4.4.1 https://github.com/Z3Prover/z3.git
+git clone --depth 1 --branch z3-4.5.0 https://github.com/Z3Prover/z3.git
 rm -rf z3/.git
 
 cd z3
@@ -145,9 +146,12 @@ cp ../src/api/z3.h ./include/z3.h
 cp ../src/api/z3_v1.h ./include/z3_v1.h
 cp ../src/api/z3_macros.h ./include/z3_macros.h
 cp ../src/api/z3_api.h ./include/z3_api.h
+cp ../src/api/z3_ast_containers.h ./include/z3_ast_containers.h
 cp ../src/api/z3_algebraic.h ./include/z3_algebraic.h
 cp ../src/api/z3_polynomial.h ./include/z3_polynomial.h
 cp ../src/api/z3_rcf.h ./include/z3_rcf.h
+cp ../src/api/z3_fixedpoint.h ./include/z3_fixedpoint.h
+cp ../src/api/z3_optimization.h ./include/z3_optimization.h
 cp ../src/api/z3_interp.h ./include/z3_interp.h
 cp ../src/api/z3_fpa.h ./include/z3_fpa.h
 cp libz3.so ./lib/libz3.so
