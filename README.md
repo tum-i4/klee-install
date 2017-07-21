@@ -177,6 +177,7 @@ cd klee
  --with-stp=$BUILDDIR/stp/build/ \
  --with-uclibc=$BUILDDIR/klee-uclibc \
  --with-z3=$BUILDDIR/z3/build/ \
+ --enable-cxx11 \
  --enable-posix-runtime
 
 make -j `nproc` ENABLE_OPTIMIZED=1
